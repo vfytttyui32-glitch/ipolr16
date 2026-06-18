@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Оформление заказа</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f0f0f0; }
+        .total { font-weight: bold; font-size: 18px; margin: 20px 0; }
+        input[type="text"] { width: 400px; padding: 8px; margin: 10px 0; }
+        button { padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; }
+        .success { color: green; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+{% if success %}
+    <h1 class="success">✅ Заказ оформлен!</h1>
+    <p>Чек отправлен на вашу почту.</p>
+    <p>Итого: {{ total }} руб.</p>
+    <a href="/catalog/">Вернуться в каталог</a>
+
+{% else %}
+    <h1>Оформление заказа</h1>
+
+    <table>
+        <tr>
+            <th>Товар</th>
+            <th>Цена</th>
+            <th>Количество</th>
+            <th>Сумма</th>
+        </tr>
+        {% for item in cart_items %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.product.price }} руб.</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.get_total_price }} руб.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <p class="total">Итого: {{ total_price }} руб.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label>Адрес доставки:</label><br>
+        <input type="text" name="address" placeholder="Введите адрес доставки" required>
+        <br><br>
+        <button type="submit">Подтвердить заказ</button>
+    </form>
+
+    <p><a href="/cart/">Вернуться в корзину</a></p>
+{% endif %}
+
+</body>
+</html>

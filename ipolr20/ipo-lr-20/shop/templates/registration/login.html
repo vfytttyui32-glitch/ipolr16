@@ -1,0 +1,37 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div style='max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;'>
+    <h2>Вход в систему</h2>
+    
+    <form method='post'>
+        {% csrf_token %}
+        
+        <div style='margin-bottom: 15px;'>
+            <label for='id_username'>Имя пользователя:</label><br>
+            <input type='text' name='username' id='id_username' required style='width: 100%; padding: 8px; margin-top: 5px;'>
+        </div>
+        
+        <div style='margin-bottom: 15px;'>
+            <label for='id_password'>Пароль:</label><br>
+            <input type='password' name='password' id='id_password' required style='width: 100%; padding: 8px; margin-top: 5px;'>
+        </div>
+        
+        {% if form.errors %}
+            <div style='color: red; margin-bottom: 15px;'>
+                Неправильное имя пользователя или пароль.
+            </div>
+        {% endif %}
+        
+        <button type='submit' style='background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;'>
+            Войти
+        </button>
+    </form>
+    
+    <p style='margin-top: 15px;'>
+        <a href='/admin/'>Вход для администратора</a>
+    </p>
+</div>
+{% endblock %}

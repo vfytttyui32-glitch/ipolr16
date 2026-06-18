@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Магазин{% endblock %}</title>
+  <style>
+    /* ── Reset & Variables ───────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #161b25;
+      --border:    #252d3d;
+      --accent:    #e8c468;
+      --accent2:   #5b9cf6;
+      --text:      #d4dbe8;
+      --muted:     #6b7a99;
+      --danger:    #e85b5b;
+      --success:   #5be87a;
+      --warning:   #e8a25b;
+      --radius:    10px;
+      --font:      'Georgia', 'Times New Roman', serif;
+      --mono:      'Courier New', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Navigation ───────────────────────────────────── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    .cart-badge {
+      background: var(--accent);
+      color: var(--bg);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      font-family: var(--mono);
+    }
+
+    /* ── Layout ───────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    /* ── Messages ─────────────────────────────────────── */
+    .messages { list-style: none; margin-bottom: 1.5rem; }
+    .messages li {
+      padding: .75rem 1rem;
+      border-radius: var(--radius);
+      font-size: .9rem;
+      margin-bottom: .5rem;
+      border-left: 4px solid;
+    }
+    .messages li.success  { background:#1a2e1e; border-color: var(--success);  color: var(--success); }
+    .messages li.error    { background:#2e1a1a; border-color: var(--danger);   color: var(--danger);  }
+    .messages li.warning  { background:#2e221a; border-color: var(--warning);  color: var(--warning); }
+    .messages li.info     { background:#1a1f2e; border-color: var(--accent2);  color: var(--accent2); }
+
+    /* ── Buttons ──────────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: .55rem 1.2rem;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: .85rem;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn:hover  { opacity: .85; }
+    .btn-primary   { background: var(--accent);  color: var(--bg); font-weight: bold; }
+    .btn-secondary { background: var(--border);  color: var(--text); }
+    .btn-danger    { background: var(--danger);  color: #fff; }
+    .btn-sm        { padding: .35rem .8rem; font-size: .8rem; }
+
+    /* ── Page heading ─────────────────────────────────── */
+    h1 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--accent); }
+    h2 { font-size: 1.4rem; margin-bottom: 1rem; }
+
+    /* ── Footer ───────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: .8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 4rem;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="{% url 'product_list' %}">🛒 SHOP</a>
+  <div class="nav-links">
+    <a href="{% url 'product_list' %}">Каталог</a>
+    {% if user.is_authenticated %}
+      <a href="{% url 'cart_view' %}">
+        Корзина
+        {% with count=user.cart.items.count %}
+          {% if count %}<span class="cart-badge">{{ count }}</span>{% endif %}
+        {% endwith %}
+      </a>
+      <a href="{% url 'admin:index' %}">Админ</a>
+      <a href="{% url 'logout' %}">Выйти ({{ user.username }})</a>
+    {% else %}
+      <a href="{% url 'login' %}">Войти</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="container">
+  {% if messages %}
+    <ul class="messages">
+      {% for msg in messages %}
+        <li class="{{ msg.tags }}">{{ msg }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<footer>© 2026 SHOP </footer>
+</body>
+</html>

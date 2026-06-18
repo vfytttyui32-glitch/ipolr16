@@ -1,0 +1,7 @@
+## login admin    password 11
+
+# anna_ivanova:password123
+# petr_sidorov:password123
+# maria_koval:password123
+# igor_novak:password123
+# olga_sobol:password123

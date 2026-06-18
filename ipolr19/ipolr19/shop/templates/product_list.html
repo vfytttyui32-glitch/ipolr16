@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Каталог товаров</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .product { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        .filters { margin: 20px 0; padding: 10px; background: #f0f0f0; }
+        .filter-form input, .filter-form select { margin: 0 10px; }
+        .search-info { color: #666; font-style: italic; margin: 10px 0; }
+        .reset { margin-left: 10px; color: red; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Каталог товаров</h1>
+
+    <div class="filters">
+        <form method="get" class="filter-form">
+            <input type="text" name="search" placeholder="Поиск по названию..." value="{{ search_query|default:'' }}">
+
+            <select name="category">
+                <option value="">Все категории</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <select name="manufacturer">
+                <option value="">Все производители</option>
+                {% for man in manufacturers %}
+                    <option value="{{ man.id }}" {% if selected_manufacturer == man.id %}selected{% endif %}>
+                        {{ man.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Применить</button>
+
+            {% if search_query or selected_category or selected_manufacturer %}
+                <a href="/catalog/" class="reset">✕ Сбросить</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Показываем что искали и сколько нашли -->
+    {% if search_query %}
+        <p class="search-info">
+            По запросу «{{ search_query }}» найдено: {{ products|length }} шт.
+        </p>
+    {% endif %}
+
+    {% for product in products %}
+        <div class="product">
+            <h2>{{ product.name }}</h2>
+            <p>Цена: {{ product.price }} руб.</p>
+            <p>В наличии: {{ product.quantity_in_stock }} шт.</p>
+            <a href="/catalog/{{ product.id }}/">Подробнее</a>
+            <a href="/cart/add/{{ product.id }}/">Добавить в корзину</a>
+        </div>
+    {% empty %}
+        <p>
+            {% if search_query %}
+                По запросу «{{ search_query }}» ничего не найдено.
+            {% else %}
+                Товаров не найдено.
+            {% endif %}
+        </p>
+    {% endfor %}
+
+    <p><a href="/cart/">Перейти в корзину</a></p>
+</body>
+</html>
