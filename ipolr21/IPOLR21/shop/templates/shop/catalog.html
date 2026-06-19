@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Каталог — HandMade Shop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="page-header mb-4">
+        <p class="section-eyebrow">Магазин</p>
+        <h1 class="section-title">Каталог товаров</h1>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Боковая панель фильтров -->
+        <div class="col-md-3">
+            <div class="filter-panel">
+                <h5 class="filter-title">
+                    <i class="bi bi-funnel me-2"></i>Фильтры
+                </h5>
+                <form method="get" action="{% url 'catalog' %}">
+
+                    <div class="mb-3">
+                        <label class="filter-label">Поиск</label>
+                        <input type="text" name="search" class="form-control form-control-sm"
+                               placeholder="Название товара..."
+                               value="{{ search_query }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="filter-label">Категория</label>
+                        <select name="category" class="form-select form-select-sm">
+                            <option value="">Все категории</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}"
+                                {% if selected_category == cat.id %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="filter-label">Производитель</label>
+                        <select name="manufacturer" class="form-select form-select-sm">
+                            <option value="">Все производители</option>
+                            {% for man in manufacturers %}
+                            <option value="{{ man.id }}"
+                                {% if selected_manufacturer == man.id %}selected{% endif %}>
+                                {{ man.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-apply w-100">Применить</button>
+                    {% if search_query or selected_category or selected_manufacturer %}
+                    <a href="{% url 'catalog' %}" class="btn btn-outline-secondary btn-sm w-100 mt-2">
+                        Сбросить
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <!-- Сетка товаров -->
+        <div class="col-md-9">
+
+            {% if search_query or selected_category or selected_manufacturer %}
+            <div class="active-filters mb-3">
+                <small class="text-muted">
+                    Найдено: <strong>{{ products|length }}</strong> товаров
+                    {% if search_query %} по запросу «{{ search_query }}»{% endif %}
+                </small>
+            </div>
+            {% endif %}
+
+            {% if products %}
+            <div class="row g-4" id="catalog-products">
+                {% for product in products %}
+                <div class="col-sm-6 col-md-4 col-lg-4">
+                    <div class="product-card h-100">
+                        <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none">
+                            <div class="product-card-img">
+                                {% if product.fotto %}
+                                    <img src="{{ product.fotto.url }}" alt="{{ product.name }}" class="img-fluid">
+                                {% else %}
+                                    <div class="product-img-placeholder">✦</div>
+                                {% endif %}
+                            </div>
+                            <div class="product-card-body">
+                                <p class="product-category">{{ product.category.name }}</p>
+                                <h6 class="product-name">{{ product.name }}</h6>
+                                <p class="product-manufacturer text-muted small">{{ product.manufacturer.name }}</p>
+                            </div>
+                        </a>
+                        <div class="product-card-footer">
+                            <span class="product-price">{{ product.price }} BYN</span>
+                            {% if product.quantity_in_stock > 0 %}
+                            <a href="{% url 'product_detail' product.pk %}" class="btn btn-card-action">
+                                Подробнее
+                            </a>
+                            {% else %}
+                            <span class="badge bg-secondary">Нет в наличии</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Пагинация -->
+            {% if products.has_other_pages %}
+            <nav class="mt-5 d-flex justify-content-center" aria-label="Пагинация">
+                <ul class="pagination">
+                    {% if products.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.previous_page_number }}&search={{ search_query }}&category={{ selected_category|default:'' }}&manufacturer={{ selected_manufacturer|default:'' }}">
+                            ←
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in products.paginator.page_range %}
+                    <li class="page-item {% if products.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}&search={{ search_query }}&category={{ selected_category|default:'' }}&manufacturer={{ selected_manufacturer|default:'' }}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                    {% if products.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.next_page_number }}&search={{ search_query }}&category={{ selected_category|default:'' }}&manufacturer={{ selected_manufacturer|default:'' }}">
+                            →
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="empty-state text-center py-5">
+                <div class="empty-icon">🔍</div>
+                <h4>Ничего не найдено</h4>
+                <p class="text-muted">Попробуйте изменить параметры фильтрации</p>
+                <a href="{% url 'catalog' %}" class="btn btn-apply">Сбросить фильтры</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="cart-toast" class="toast" role="alert">
+        <div class="toast-header">
+            <strong class="me-auto">✦ HandMade Shop</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toast-message">Товар добавлен в корзину!</div>
+    </div>
+</div>
+
+{% endblock %}

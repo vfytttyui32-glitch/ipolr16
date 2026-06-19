@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+ 
+{% block title %}{{ product.name }} — HandMade Shop{% endblock %}
+ 
+{% block content %}
+<div class="container py-4">
+ 
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'product_list' %}" class="breadcrumb-link">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'catalog' %}" class="breadcrumb-link">Каталог</a></li>
+            {% if product.category %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'catalog' %}?category={{ product.category.id }}" class="breadcrumb-link">
+                    {{ product.category.name }}
+                </a>
+            </li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+        </ol>
+    </nav>
+ 
+    <!-- Основной блок -->
+    <div class="row g-5">
+ 
+        <!-- Фото товара -->
+        <div class="col-md-6">
+            <div class="product-detail-img-wrap">
+                {% if product.fotto %}
+                    <img src="{{ product.fotto.url }}" alt="{{ product.name }}" class="img-fluid rounded-3">
+                {% else %}
+                    <div class="product-detail-placeholder">
+                        <span>✦</span>
+                        <p>Фото скоро появится</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+ 
+        <!-- Информация о товаре -->
+        <div class="col-md-6">
+            {% if product.category %}
+            <p class="detail-category">{{ product.category.name }}</p>
+            {% endif %}
+ 
+            <h1 class="detail-name">{{ product.name }}</h1>
+ 
+            {% if product.manufacturer %}
+            <p class="detail-manufacturer">
+                <i class="bi bi-shop me-1"></i>
+                {{ product.manufacturer.name }}
+                {% if product.manufacturer.country %}
+                · {{ product.manufacturer.country }}
+                {% endif %}
+            </p>
+            {% endif %}
+ 
+            <div class="detail-price-block">
+                <span class="detail-price">{{ product.price }} BYN</span>
+                {% if product.quantity_in_stock > 0 %}
+                <span class="stock-badge in-stock">
+                    <i class="bi bi-check-circle me-1"></i>В наличии ({{ product.quantity_in_stock }} шт.)
+                </span>
+                {% else %}
+                <span class="stock-badge out-of-stock">
+                    <i class="bi bi-x-circle me-1"></i>Нет в наличии
+                </span>
+                {% endif %}
+            </div>
+ 
+            {% if product.description %}
+            <div class="detail-description">
+                <h6 class="detail-desc-title">Описание</h6>
+                <p>{{ product.description }}</p>
+            </div>
+            {% endif %}
+ 
+            {% if product.opisanie %}
+            <div class="detail-description">
+                <h6 class="detail-desc-title">Подробнее</h6>
+                <p>{{ product.opisanie }}</p>
+            </div>
+            {% endif %}
+ 
+            <!-- Кнопка добавления в корзину -->
+            <div class="detail-actions mt-4">
+                {% if user.is_authenticated %}
+                    {% if product.quantity_in_stock > 0 %}
+                    <a href="{% url 'add_to_cart' product.pk %}" class="btn btn-add-cart btn-lg">
+                        <i class="bi bi-bag-plus me-2"></i>Добавить в корзину
+                    </a>
+                    {% else %}
+                    <button class="btn btn-add-cart btn-lg" disabled>
+                        <i class="bi bi-bag-x me-2"></i>Нет в наличии
+                    </button>
+                    {% endif %}
+                {% else %}
+                <a href="/admin/login/?next={{ request.path }}" class="btn btn-add-cart btn-lg">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Войдите, чтобы купить
+                </a>
+                {% endif %}
+ 
+                <a href="{% url 'catalog' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                    ← Назад
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="cart-toast" class="toast" role="alert">
+        <div class="toast-header">
+            <strong class="me-auto">✦ HandMade Shop</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toast-message">Товар добавлен в корзину!</div>
+    </div>
+</div>
+ 
+{% endblock %}
