@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}HandMade Shop — Украшения ручной работы из Беларуси{% endblock %}
+
+{% block content %}
+
+<!-- Hero секция -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center" style="min-height:60vh;">
+            <div class="col-lg-6">
+                <p class="hero-eyebrow">Ручная работа · Беларусь</p>
+                <h1 class="hero-title">Украшения,<br>созданные<br>с душой</h1>
+                <p class="hero-subtitle">Авторские изделия от белорусских мастеров — браслеты, серьги, украшения из натуральных материалов. Каждая вещь уникальна.</p>
+                <a href="{% url 'catalog' %}" class="btn btn-hero me-3">Перейти в каталог</a>
+                <a href="#categories" class="btn btn-hero-outline">Категории</a>
+            </div>
+            <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+                <div class="hero-decoration">
+                    <div class="hero-circle hero-circle-1"></div>
+                    <div class="hero-circle hero-circle-2"></div>
+                    <div class="hero-badge">
+                        <span class="hero-badge-number">34+</span>
+                        <span class="hero-badge-label">товаров</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Секция популярных товаров -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex align-items-end justify-content-between mb-4">
+            <div>
+                <p class="section-eyebrow">Свежие поступления</p>
+                <h2 class="section-title">Популярные товары</h2>
+            </div>
+            <a href="{% url 'catalog' %}" class="btn btn-outline-dark btn-sm">Смотреть все →</a>
+        </div>
+
+        <div id="products-spinner" class="text-center py-5">
+            <div class="spinner-border" role="status" style="color: var(--accent);">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="mt-2 text-muted">Загружаем товары...</p>
+        </div>
+
+        <div id="popular-products" class="row g-4"></div>
+
+        <div id="products-error" class="alert alert-warning d-none">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Не удалось загрузить товары. <a href="{% url 'catalog' %}">Перейти в каталог</a>
+        </div>
+    </div>
+</section>
+
+<!-- Секция категорий -->
+<section class="categories-section py-5" id="categories">
+    <div class="container">
+        <div class="mb-4">
+            <p class="section-eyebrow">Навигация по магазину</p>
+            <h2 class="section-title">Категории</h2>
+        </div>
+        <div class="row g-3">
+            {% for category in categories %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{% url 'catalog' %}?category={{ category.id }}" class="category-card text-decoration-none">
+                    <div class="category-icon">✦</div>
+                    <div class="category-name">{{ category.name }}</div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="cart-toast" class="toast" role="alert">
+        <div class="toast-header">
+            <strong class="me-auto">✦ HandMade Shop</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toast-message">Товар добавлен в корзину!</div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    loadPopularProducts();
+</script>
+{% endblock %}

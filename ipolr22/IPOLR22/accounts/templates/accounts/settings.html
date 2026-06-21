@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Настройки — HandMade Shop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4"><i class="bi bi-gear me-2" style="color:#8b5e83"></i>Настройки аккаунта</h2>
+
+    <div class="row g-4">
+
+        <!-- Смена пароля -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-key me-2"></i>Смена пароля</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="change_password">
+                        <div class="mb-3">
+                            <label class="form-label">Текущий пароль</label>
+                            <input type="password" name="old_password" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Новый пароль</label>
+                            <input type="password" name="new_password" class="form-control" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Повторите новый пароль</label>
+                            <input type="password" name="new_password2" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-apply">
+                            <i class="bi bi-check-lg me-1"></i>Изменить пароль
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Смена email -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-envelope me-2"></i>Смена Email</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="change_email">
+                        <div class="mb-3">
+                            <label class="form-label">Текущий email</label>
+                            <input type="text" class="form-control" value="{{ request.user.email|default:'не указан' }}" disabled>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Новый email</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-apply">
+                            <i class="bi bi-check-lg me-1"></i>Изменить email
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Информация об аккаунте -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div>
+                        <h6 class="mb-1">{{ request.user.username }}</h6>
+                        <span class="text-muted small">Аккаунт создан: {{ request.user.date_joined|date:"d.m.Y" }}</span>
+                    </div>
+                    <div class="ms-auto">
+                        <span class="badge fs-6
+                            {% if profile.role == 'ADMIN' %}bg-danger
+                            {% elif profile.role == 'MANAGER' %}bg-warning text-dark
+                            {% else %}bg-success{% endif %}
+                            rounded-pill px-3 py-2">
+                            {{ profile.get_role_display }}
+                        </span>
+                    </div>
+                    <a href="{% url 'profile' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>В кабинет
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

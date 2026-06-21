@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% block title %}Личный кабинет — HandMade Shop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <h2 class="mb-0"><i class="bi bi-person-circle me-2" style="color:#8b5e83"></i>Личный кабинет</h2>
+        <!-- Визуальное отображение роли (Задание индивидуальное п.2) -->
+        <span class="badge fs-6
+            {% if profile.role == 'ADMIN' %}bg-danger
+            {% elif profile.role == 'MANAGER' %}bg-warning text-dark
+            {% else %}bg-success{% endif %}
+            rounded-pill px-3 py-2">
+            <i class="bi bi-{% if profile.role == 'ADMIN' %}shield-fill{% elif profile.role == 'MANAGER' %}briefcase-fill{% else %}person-fill{% endif %} me-1"></i>
+            {{ profile.get_role_display }}
+        </span>
+        {% if is_admin %}
+        <span class="badge bg-dark rounded-pill px-3 py-2">
+            <i class="bi bi-stars me-1"></i>Расширенный доступ
+        </span>
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+
+        <!-- ─── БЛОК ПРОФИЛЯ ───────────────────────────────── -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Профиль</h5>
+                </div>
+                <div class="card-body">
+
+                    <!-- Отображение данных -->
+                    <div id="profileDisplay">
+                        <table class="table table-borderless table-sm">
+                            <tr>
+                                <th class="text-muted" style="width:45%">Пользователь</th>
+                                <td><strong>{{ request.user.username }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Email</th>
+                                <td id="disp-email">{{ request.user.email|default:"—" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Полное имя</th>
+                                <td id="disp-full-name">{{ profile.full_name|default:"—" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Телефон</th>
+                                <td id="disp-phone">{{ profile.phone|default:"—" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Адрес</th>
+                                <td id="disp-address">{{ profile.address|default:"—" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Любимая категория</th>
+                                <td id="disp-fav">{{ profile.get_favorite_category_display|default:"—" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Город доставки</th>
+                                <td id="disp-city">{{ profile.city|default:"—" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Почтовый индекс</th>
+                                <td id="disp-postal">{{ profile.postal_code|default:"—" }}</td>
+                            </tr>
+                        </table>
+                        <button class="btn btn-apply btn-sm w-100" onclick="toggleEditForm(true)">
+                            <i class="bi bi-pencil me-1"></i>Редактировать
+                        </button>
+                    </div>
+
+                    <!-- Форма редактирования (Задание 4 + Задание 5 - Fetch PATCH) -->
+                    <div id="profileForm" style="display:none">
+                        <div id="profileAlert"></div>
+                        <div class="mb-2">
+                            <label class="form-label form-label-sm">Полное имя</label>
+                            <input type="text" id="fullName" class="form-control form-control-sm"
+                                   value="{{ profile.full_name|default:'' }}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label form-label-sm">Email</label>
+                            <input type="email" id="email" class="form-control form-control-sm"
+                                   value="{{ request.user.email }}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label form-label-sm">Телефон</label>
+                            <input type="text" id="phone" class="form-control form-control-sm"
+                                   placeholder="+375 XX XXX-XX-XX"
+                                   value="{{ profile.phone|default:'' }}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label form-label-sm">Адрес доставки</label>
+                            <textarea id="address" class="form-control form-control-sm" rows="2">{{ profile.address|default:'' }}</textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label form-label-sm">Любимая категория украшений</label>
+                            <select id="favoriteCategory" class="form-select form-select-sm">
+                                <option value="">— не выбрано —</option>
+                                <option value="rings" {% if profile.favorite_category == 'rings' %}selected{% endif %}>Кольца</option>
+                                <option value="bracelets" {% if profile.favorite_category == 'bracelets' %}selected{% endif %}>Браслеты</option>
+                                <option value="pendants" {% if profile.favorite_category == 'pendants' %}selected{% endif %}>Подвески</option>
+                                <option value="earrings" {% if profile.favorite_category == 'earrings' %}selected{% endif %}>Серьги</option>
+                                <option value="necklaces" {% if profile.favorite_category == 'necklaces' %}selected{% endif %}>Ожерелья</option>
+                            </select>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-7">
+                                <label class="form-label form-label-sm">Город доставки</label>
+                                <input type="text" id="city" class="form-control form-control-sm"
+                                       value="{{ profile.city|default:'' }}">
+                            </div>
+                            <div class="col-5">
+                                <label class="form-label form-label-sm">Индекс</label>
+                                <input type="text" id="postalCode" class="form-control form-control-sm"
+                                       value="{{ profile.postal_code|default:'' }}">
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-apply btn-sm flex-fill" onclick="saveProfile()">
+                                <i class="bi bi-check-lg me-1"></i>Сохранить
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="toggleEditForm(false)">
+                                Отмена
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── БЛОК ЗАКАЗОВ ──────────────────────────────── -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bag-check me-2"></i>
+                        {% if is_admin %}Все заказы{% else %}Мои заказы{% endif %}
+                    </h5>
+                    <span class="badge bg-secondary">{{ orders|length }}</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    {% if is_admin %}<th>Покупатель</th>{% endif %}
+                                    <th>Дата</th>
+                                    <th>Статус</th>
+                                    <th>Сумма</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td class="fw-bold">{{ order.id }}</td>
+                                    {% if is_admin %}<td>{{ order.user.username }}</td>{% endif %}
+                                    <td class="text-muted small">{{ order.created_at|date:"d.m.Y" }}</td>
+                                    <td>
+                                        <span class="badge
+                                            {% if order.status == 'delivered' %}bg-success
+                                            {% elif order.status == 'cancelled' %}bg-danger
+                                            {% elif order.status == 'shipped' %}bg-info text-dark
+                                            {% elif order.status == 'processing' %}bg-primary
+                                            {% else %}bg-warning text-dark{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td><strong>{{ order.total_amount }} BYN</strong></td>
+                                    <td>
+                                        <button class="btn btn-outline-secondary btn-sm"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#order-{{ order.id }}">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- Детали заказа (Задание 4 п.2 — кнопка Подробнее) -->
+                                <tr class="collapse" id="order-{{ order.id }}">
+                                    <td colspan="{% if is_admin %}6{% else %}5{% endif %}" class="bg-light">
+                                        <div class="p-2">
+                                            {% if order.shipping_address %}
+                                            <p class="small text-muted mb-2">
+                                                <i class="bi bi-geo-alt me-1"></i>{{ order.shipping_address }}
+                                            </p>
+                                            {% endif %}
+                                            <table class="table table-sm table-bordered mb-0 bg-white">
+                                                <thead>
+                                                    <tr class="table-secondary">
+                                                        <th>Товар</th>
+                                                        <th class="text-end">Цена</th>
+                                                        <th class="text-center">Кол-во</th>
+                                                        <th class="text-end">Итого</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for item in order.items.all %}
+                                                    <tr>
+                                                        <td>{{ item.product_name }}</td>
+                                                        <td class="text-end">{{ item.price }}</td>
+                                                        <td class="text-center">{{ item.quantity }}</td>
+                                                        <td class="text-end fw-bold">{{ item.subtotal }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-bag-x" style="font-size:2.5rem"></i>
+                        <p class="mt-2">Заказов пока нет</p>
+                        <a href="{% url 'catalog' %}" class="btn btn-apply btn-sm">Перейти в каталог</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if is_admin %}
+            <!-- Панель администратора -->
+            <div class="card border-0 shadow-sm mt-3 border-start border-danger border-3">
+                <div class="card-body">
+                    <h6 class="text-danger mb-3"><i class="bi bi-shield-fill me-2"></i>Панель администратора</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="/admin/" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-gear me-1"></i>Панель Django Admin
+                        </a>
+                        <a href="/api/" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-code-slash me-1"></i>API Browser
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ─── Получение CSRF-токена ───────────────────────────────────────────────────
+function getCookie(name) {
+    let val = null;
+    document.cookie.split(';').forEach(c => {
+        if (c.trim().startsWith(name + '=')) val = decodeURIComponent(c.trim().split('=')[1]);
+    });
+    return val;
+}
+
+// ─── Переключение формы ──────────────────────────────────────────────────────
+function toggleEditForm(show) {
+    document.getElementById('profileDisplay').style.display = show ? 'none' : '';
+    document.getElementById('profileForm').style.display = show ? '' : 'none';
+}
+
+// ─── Задание 5: Fetch PATCH /api/auth/me/ с CSRF ────────────────────────────
+async function saveProfile() {
+    const alertBox = document.getElementById('profileAlert');
+    alertBox.innerHTML = '';
+
+    const payload = {
+        full_name:         document.getElementById('fullName').value,
+        phone:             document.getElementById('phone').value,
+        address:           document.getElementById('address').value,
+        favorite_category: document.getElementById('favoriteCategory').value,
+        city:              document.getElementById('city').value,
+        postal_code:       document.getElementById('postalCode').value,
+        email:             document.getElementById('email').value,
+    };
+
+    try {
+        const response = await fetch('/api/auth/me/', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify(payload),
+        });
+
+        // ─── Задание 5: обработчик ошибок 401/403 ───────────────────────
+        if (response.status === 401) {
+            alertBox.innerHTML = '<div class="alert alert-danger py-2">Ошибка 401: вы не вошли в систему. <a href="/accounts/login/">Войти</a></div>';
+            return;
+        }
+        if (response.status === 403) {
+            alertBox.innerHTML = '<div class="alert alert-danger py-2">Ошибка 403: доступ запрещён</div>';
+            return;
+        }
+        if (!response.ok) {
+            const err = await response.json();
+            alertBox.innerHTML = `<div class="alert alert-danger py-2">Ошибка: ${JSON.stringify(err)}</div>`;
+            return;
+        }
+
+        const data = await response.json();
+        const p = data.profile || {};
+
+        // Обновляем отображение без перезагрузки
+        document.getElementById('disp-email').textContent      = data.email || '—';
+        document.getElementById('disp-full-name').textContent  = p.full_name || '—';
+        document.getElementById('disp-phone').textContent      = p.phone || '—';
+        document.getElementById('disp-address').textContent    = p.address || '—';
+        document.getElementById('disp-fav').textContent        = p.favorite_category_display || '—';
+        document.getElementById('disp-city').textContent       = p.city || '—';
+        document.getElementById('disp-postal').textContent     = p.postal_code || '—';
+
+        toggleEditForm(false);
+        alertBox.innerHTML = '';
+
+        // Flash-сообщение
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success alert-dismissible fade show position-fixed bottom-0 end-0 m-3';
+        toast.innerHTML = '<i class="bi bi-check-circle me-2"></i>Профиль сохранён <button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+
+    } catch (e) {
+        alertBox.innerHTML = `<div class="alert alert-danger py-2">Сетевая ошибка: ${e.message}</div>`;
+    }
+}
+</script>
+{% endblock %}
